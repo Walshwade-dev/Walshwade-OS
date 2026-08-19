@@ -18,36 +18,47 @@
 
 @layer components {
   .glass-panel {
-    @apply relative bg-panel backdrop-blur-md shadow-lg transition-all duration-300 hover:-translate-y-[1px] hover:shadow-[0_0_20px_rgba(14,165,233,0.15)];
+    @apply relative bg-panel backdrop-blur-md shadow-lg motion-safe:transition-all motion-safe:duration-300 motion-safe:hover:-translate-y-[1px] hover:shadow-[0_0_20px_rgba(14,165,233,0.15)];
     clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
     border: 1px solid #334155;
   }
 
-  .glass-panel::before {
+  .glass-panel::before,
+  .glass-panel::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
     width: 35%;
     max-width: 150px;
     height: 3px;
     background-color: #0ea5e9; /* Cyan/primary default */
     box-shadow: 0 0 8px rgba(14, 165, 233, 0.5);
-    transition: all 0.3s ease;
+    @apply motion-safe:transition-all motion-safe:duration-300;
+  }
+
+  .glass-panel::before {
+    top: 0;
+    left: 0;
+  }
+
+  .glass-panel::after {
+    bottom: 0;
+    right: 20px; /* Accounts for the bottom-right clip-path diagonal */
   }
 
   .glass-panel:hover::before,
-  .glass-panel:focus-within::before {
+  .glass-panel:focus-within::before,
+  .glass-panel:hover::after,
+  .glass-panel:focus-within::after {
     background-color: #f59e0b; /* Amber hover */
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.9);
   }
   
   .glass-input {
-    @apply w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
+    @apply w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary motion-safe:transition-all motion-safe:duration-200;
   }
   
   .btn-primary {
-    @apply px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_rgba(14,165,233,0.7)] hover:bg-primary-dark transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-[0_0_15px_rgba(14,165,233,0.5)] hover:shadow-[0_0_25px_rgba(14,165,233,0.7)] hover:bg-primary-dark motion-safe:transition-all motion-safe:duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-primary;
   }
   
   .badge-sci {
@@ -56,5 +67,6 @@
   
   .sci-fi-nav-item {
     clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary;
   }
 }

@@ -12,15 +12,21 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -33,7 +39,11 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       />
       
       {/* Modal Content */}
-      <div className="relative glass-panel w-full max-w-2xl max-h-[90vh] flex flex-col p-0 z-10 overflow-hidden shadow-[0_0_30px_rgba(14,165,233,0.2)]">
+      <div 
+        className="relative glass-panel w-full max-w-2xl max-h-[90vh] flex flex-col p-0 z-10 overflow-hidden shadow-[0_0_30px_rgba(14,165,233,0.2)]"
+        role="dialog"
+        aria-modal="true"
+      >
         {/* Header */}
         <div className="p-4 md:p-6 border-b border-panel-border flex justify-between items-center bg-slate-900/50">
           <h2 className="text-2xl font-bold tracking-wider text-slate-100 flex-1 pr-4 truncate">
@@ -41,7 +51,8 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           </h2>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-warning transition-colors focus:outline-none p-1"
+            className="text-slate-400 hover:text-warning transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded p-3 -mr-2"
+            aria-label="Close modal"
           >
             <X size={24} />
           </button>

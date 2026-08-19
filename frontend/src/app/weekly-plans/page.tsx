@@ -164,14 +164,14 @@ export default function WeeklyPlansPage() {
             {plans?.map(plan => (
               <div 
                 key={plan.id} 
-                className="glass-panel p-5 border-l-4 border-l-primary hover:border-l-warning cursor-pointer transition-colors"
+                className="glass-panel p-5 cursor-pointer transition-colors"
                 onClick={() => setSelectedPlan(plan)}
               >
                 <h3 className="text-lg font-bold mb-3 text-slate-100 flex items-center gap-2">
                   <Clock size={16} className="text-critical" />
                   Cycle: {plan.week_start_date}
                 </h3>
-                {plan.notes && <p className="text-sm text-slate-400 line-clamp-2">{plan.notes}</p>}
+                {plan.notes && <p className="font-body text-sm text-slate-400 line-clamp-2">{plan.notes}</p>}
               </div>
             ))}
             {plans?.length === 0 && (
@@ -190,7 +190,7 @@ export default function WeeklyPlansPage() {
             </h3>
             <div className="mt-4">
               <h4 className="text-sm font-bold tracking-wider text-slate-500 uppercase mb-2">Cycle Parameters</h4>
-              <p className="text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
+              <p className="font-body text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
                 {selectedPlan.notes || "No parameters specified for this cycle."}
               </p>
             </div>

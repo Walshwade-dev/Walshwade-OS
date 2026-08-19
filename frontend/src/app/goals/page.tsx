@@ -123,7 +123,7 @@ export default function GoalsPage() {
             {goals?.map(goal => (
               <div 
                 key={goal.id} 
-                className="glass-panel p-5 border-l-4 border-l-primary hover:border-l-warning cursor-pointer transition-colors"
+                className="glass-panel p-5 cursor-pointer transition-colors"
                 onClick={() => setSelectedGoal(goal)}
               >
                 <h3 className="text-lg font-bold mb-3 text-slate-100">{goal.title}</h3>
@@ -135,7 +135,7 @@ export default function GoalsPage() {
                     <Activity size={12} /> {goal.status}
                   </span>
                 </div>
-                {goal.description && <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">{goal.description}</p>}
+                {goal.description && <p className="font-body text-sm text-slate-400 leading-relaxed line-clamp-2">{goal.description}</p>}
               </div>
             ))}
             {goals?.length === 0 && (
@@ -159,7 +159,7 @@ export default function GoalsPage() {
             </div>
             <div className="mt-4">
               <h4 className="text-sm font-bold tracking-wider text-slate-500 uppercase mb-2">Description / Parameters</h4>
-              <p className="text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
+              <p className="font-body text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
                 {selectedGoal.description || "No specific details provided for this objective."}
               </p>
             </div>

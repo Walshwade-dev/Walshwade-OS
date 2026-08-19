@@ -24,7 +24,7 @@ export default function Sidebar() {
         <Link href="/" className="flex whitespace-nowrap text-2xl font-black font-[family-name:var(--font-orbitron)] text-primary tracking-[0.2em] uppercase">
           WADE OS
         </Link>
-        <button onClick={() => setIsOpen(!isOpen)} className="text-foreground focus:outline-none">
+        <button onClick={() => setIsOpen(!isOpen)} className="text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary p-3 -mr-2">
           <Menu size={28} />
         </button>
       </div>

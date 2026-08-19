@@ -14,3 +14,4 @@
 | 2026-08-19 | Fonts | Integrated `Rajdhani` Google Font for futuristic typography | Done |
 | 2026-08-19 | UI Refinement | Added interactive Modals for list items and dynamic Greeting component | Done |
 | 2026-08-19 | Polish | Fixed layout alignments, unified borders, and stabilized animations | Done |
+| 2026-08-19 | UX & A11y | Touch targets, keyboard focus, reduced-motion, and responsive typography | Done |

@@ -4,12 +4,12 @@ import Greeting from '@/components/Greeting';
 
 export default function Home() {
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl 2xl:max-w-screen-2xl mx-auto transition-all duration-300">
       <Greeting />
       <div className="mb-12 border-b border-panel-border pb-6 flex items-center gap-4">
         <Zap size={32} className="text-warning animate-pulse" />
         <div>
-          <h1 className="text-4xl font-bold tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-primary to-warning">
+          <h1 className="text-4xl font-bold tracking-widest uppercase text-primary">
             System Dashboard
           </h1>
           <p className="text-slate-400 mt-2 tracking-wide">Operational overview and quick access links.</p>

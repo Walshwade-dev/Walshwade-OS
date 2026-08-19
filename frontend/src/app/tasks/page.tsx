@@ -19,7 +19,7 @@ export default function TasksPage() {
     queryFn: () => fetchTasks(),
   });
 
-  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects });
+  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: () => fetchProjects() });
 
   const mutation = useMutation({
     mutationFn: createTask,
@@ -144,7 +144,7 @@ export default function TasksPage() {
               return (
                 <div 
                   key={task.id} 
-                  className="glass-panel p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-l-4 border-l-primary hover:border-l-warning cursor-pointer transition-colors"
+                  className="glass-panel p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer transition-colors"
                   onClick={() => setSelectedTask(task)}
                 >
                   <div className="flex-1">
@@ -200,7 +200,7 @@ export default function TasksPage() {
             </div>
             <div className="mt-4">
               <h4 className="text-sm font-bold tracking-wider text-slate-500 uppercase mb-2">Details</h4>
-              <p className="text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
+              <p className="font-body text-slate-300 leading-relaxed bg-slate-800/50 p-4 rounded border border-slate-700 whitespace-pre-wrap">
                 {selectedTask.description || "No specific details provided for this task."}
               </p>
             </div>
