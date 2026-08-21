@@ -33,7 +33,7 @@ export default function Greeting() {
   else if (hours < 18) greeting = 'Good Afternoon';
 
   return (
-    <div className="glass-panel p-6 mb-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+    <div className="glass-panel p-6 mb-8 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between sticky top-0 z-40 backdrop-blur-xl shadow-2xl">
       <div>
         <h2 className="text-2xl lg:text-3xl 2xl:text-4xl font-bold tracking-widest text-slate-100 mb-2 transition-all">
           {greeting}, Wade.

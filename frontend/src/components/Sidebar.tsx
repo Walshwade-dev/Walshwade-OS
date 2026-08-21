@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Target, FolderKanban, CheckSquare, CalendarDays, Menu } from 'lucide-react';
+import { Target, FolderKanban, CheckSquare, CalendarDays, Menu, Zap, Activity, FileText } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 
 const navItems = [
+  { href: '/today', label: 'Today', icon: Zap },
+  { href: '/dashboard', label: 'Dashboard', icon: Activity },
+  { href: '/reviews', label: 'Reviews', icon: FileText },
   { href: '/goals', label: 'Goals', icon: Target },
   { href: '/projects', label: 'Projects', icon: FolderKanban },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },

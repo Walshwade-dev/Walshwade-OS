@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { Target, FolderKanban, CheckSquare, CalendarDays, Zap } from 'lucide-react';
-import Greeting from '@/components/Greeting';
 
 export default function Home() {
   return (
     <div className="max-w-6xl 2xl:max-w-screen-2xl mx-auto transition-all duration-300">
-      <Greeting />
       <div className="mb-12 border-b border-panel-border pb-6 flex items-center gap-4">
         <Zap size={32} className="text-warning animate-pulse" />
         <div>

@@ -1,9 +1,9 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchTasks, fetchProjects, createTask, Task } from '@/lib/api';
+import { fetchTasks, fetchProjects, createTask, createFailure, Task, FailureType } from '@/lib/api';
 import { useState } from 'react';
-import { CheckSquare, PlusCircle, LayoutGrid, AlertTriangle, Clock } from 'lucide-react';
+import { CheckSquare, PlusCircle, LayoutGrid, AlertTriangle, Clock, X } from 'lucide-react';
 import Modal from '@/components/Modal';
 
 export default function TasksPage() {
@@ -13,6 +13,10 @@ export default function TasksPage() {
   const [projectId, setProjectId] = useState('');
   const [priority, setPriority] = useState('medium');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  
+  const [showFailureForm, setShowFailureForm] = useState(false);
+  const [failureType, setFailureType] = useState<FailureType>('other');
+  const [failureDescription, setFailureDescription] = useState('');
 
   const { data: tasks, isLoading, error } = useQuery({
     queryKey: ['tasks'],
@@ -36,6 +40,24 @@ export default function TasksPage() {
     e.preventDefault();
     mutation.mutate({ title, description, project_id: projectId, priority, status: 'todo' });
   };
+
+  const failureMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedTask) return;
+      return createFailure({
+        task_id: selectedTask.id,
+        failure_type: failureType,
+        description: failureDescription || "No description provided"
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      setShowFailureForm(false);
+      setSelectedTask(null);
+      setFailureType('other');
+      setFailureDescription('');
+    }
+  });
 
   const getPriorityColor = (p: string) => {
     switch(p) {
@@ -204,6 +226,65 @@ export default function TasksPage() {
                 {selectedTask.description || "No specific details provided for this task."}
               </p>
             </div>
+
+            {/* Mark Failed Section */}
+            {!showFailureForm && !['failed', 'completed'].includes(selectedTask.status) && (
+              <div className="mt-6 flex justify-end">
+                <button 
+                  onClick={() => setShowFailureForm(true)}
+                  className="flex items-center gap-2 text-sm font-bold tracking-wider uppercase text-critical hover:text-white transition-colors border border-critical hover:bg-critical/20 px-4 py-2 rounded bg-critical/10"
+                >
+                  <X size={16} /> Mark Failed
+                </button>
+              </div>
+            )}
+
+            {showFailureForm && (
+              <div className="mt-6 p-4 border border-critical/50 bg-critical/10 rounded">
+                <h4 className="text-sm font-bold tracking-wider text-critical uppercase mb-4">Record Task Failure</h4>
+                <div className="mb-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Failure Type</label>
+                  <select 
+                     className="glass-input" 
+                     value={failureType} 
+                     onChange={e => setFailureType(e.target.value as FailureType)}
+                  >
+                    <option value="poor_estimation">Poor Estimation</option>
+                    <option value="lack_of_knowledge">Lack of Knowledge</option>
+                    <option value="task_too_difficult">Task Too Difficult</option>
+                    <option value="task_unclear">Task Unclear</option>
+                    <option value="distraction">Distraction</option>
+                    <option value="fatigue">Fatigue</option>
+                    <option value="unexpected_responsibility">Unexpected Responsibility</option>
+                    <option value="procrastination">Procrastination</option>
+                    <option value="technical_problem">Technical Problem</option>
+                    <option value="emotional_resistance">Emotional Resistance</option>
+                    <option value="scheduling_problem">Scheduling Problem</option>
+                    <option value="missing_dependency">Missing Dependency</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Description</label>
+                  <textarea 
+                     className="glass-input h-20 resize-none" 
+                     placeholder="What went wrong?"
+                     value={failureDescription}
+                     onChange={e => setFailureDescription(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button onClick={() => setShowFailureForm(false)} className="px-4 py-2 rounded text-slate-400 hover:text-white">Cancel</button>
+                  <button 
+                    onClick={() => failureMutation.mutate()} 
+                    disabled={failureMutation.isPending}
+                    className="px-4 py-2 rounded bg-critical text-white font-bold tracking-wider uppercase text-sm hover:bg-red-600 transition-colors"
+                  >
+                    Confirm Failure
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>

@@ -20,6 +20,7 @@ class TaskStatusEnum(str, enum.Enum):
     in_progress = "in_progress"
     completed = "completed"
     failed = "failed"
+    rescheduled = "rescheduled"
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -37,3 +38,5 @@ class Task(Base):
 
     project = relationship("Project", back_populates="tasks")
     weekly_plans = relationship("WeeklyPlanTask", back_populates="task", cascade="all, delete-orphan")
+    time_blocks = relationship("TimeBlock", back_populates="task", cascade="all, delete-orphan")
+    work_sessions = relationship("WorkSession", back_populates="task", cascade="all, delete-orphan")

@@ -15,3 +15,6 @@
 | 2026-08-19 | UI Refinement | Added interactive Modals for list items and dynamic Greeting component | Done |
 | 2026-08-19 | Polish | Fixed layout alignments, unified borders, and stabilized animations | Done |
 | 2026-08-19 | UX & A11y | Touch targets, keyboard focus, reduced-motion, and responsive typography | Done |
+| 2026-08-19 | Navigation | Added `/today` link to sidebar navigation panel | Done |
+| 2026-08-19 | Execution UI | Built `/today` active dashboard showing dynamic schedule timeline | Done |
+| 2026-08-19 | Session State | Wired interactive controls (Start/Pause/Resume/Complete) to API mutations | Done |
