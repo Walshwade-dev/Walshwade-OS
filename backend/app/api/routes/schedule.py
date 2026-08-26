@@ -10,8 +10,9 @@ from app.repositories.time_block import TimeBlockRepository
 from app.repositories.weekly_plan import WeeklyPlanRepository
 from app.services.scheduler import generate_daily_schedule
 from app.schemas.time_block import TimeBlockResponse, TimeBlockCreate
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/schedule", tags=["Schedule"])
+router = APIRouter(prefix="/schedule", tags=["Schedule"], dependencies=[Depends(verify_api_key)])
 
 class GenerateScheduleRequest(BaseModel):
     target_date: date

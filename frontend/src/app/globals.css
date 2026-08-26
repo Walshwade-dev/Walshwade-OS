@@ -5,6 +5,8 @@
   :root {
     --background: #0f172a;
     --foreground: #f8fafc;
+    --font-rajdhani: "Segoe UI", "Tahoma", sans-serif;
+    --font-orbitron: "Segoe UI", "Tahoma", sans-serif;
   }
   body {
     background-color: var(--background);

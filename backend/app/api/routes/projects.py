@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.project import ProjectCreate, ProjectResponse
+from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.repositories.project import ProjectRepository
 from app.repositories.goal import GoalRepository
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/projects", tags=["projects"])
+router = APIRouter(prefix="/projects", tags=["projects"], dependencies=[Depends(verify_api_key)])
 
 @router.post("/", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 def create_project(project: ProjectCreate, db: Session = Depends(get_db)):
@@ -31,3 +32,19 @@ def get_project(project_id: UUID, db: Session = Depends(get_db)):
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
+
+@router.patch("/{project_id}", response_model=ProjectResponse)
+def update_project(project_id: UUID, payload: ProjectUpdate, db: Session = Depends(get_db)):
+    repo = ProjectRepository(db)
+    project = repo.update(project_id, payload)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
+
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_project(project_id: UUID, db: Session = Depends(get_db)):
+    repo = ProjectRepository(db)
+    deleted = repo.delete(project_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return None

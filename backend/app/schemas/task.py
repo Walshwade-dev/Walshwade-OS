@@ -12,8 +12,19 @@ class TaskBase(BaseModel):
     deadline: Optional[date] = None
     status: TaskStatusEnum = TaskStatusEnum.backlog
 
+    model_config = ConfigDict(extra='forbid')
+
 class TaskCreate(TaskBase):
     project_id: UUID
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[TaskPriorityEnum] = None
+    estimated_duration_minutes: Optional[int] = None
+    deadline: Optional[date] = None
+
+    model_config = ConfigDict(extra='forbid')
 
 class TaskResponse(TaskBase):
     id: UUID

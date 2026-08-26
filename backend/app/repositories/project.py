@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from app.models.project import Project
-from app.schemas.project import ProjectCreate
+from app.schemas.project import ProjectCreate, ProjectUpdate
 
 class ProjectRepository:
     def __init__(self, db: Session):
@@ -23,3 +23,23 @@ class ProjectRepository:
         self.db.commit()
         self.db.refresh(db_project)
         return db_project
+
+    def update(self, project_id: UUID, project_update: ProjectUpdate) -> Optional[Project]:
+        db_project = self.get(project_id)
+        if not db_project:
+            return None
+
+        for field, value in project_update.model_dump(exclude_unset=True).items():
+            setattr(db_project, field, value)
+
+        self.db.commit()
+        self.db.refresh(db_project)
+        return db_project
+
+    def delete(self, project_id: UUID) -> bool:
+        db_project = self.get(project_id)
+        if not db_project:
+            return False
+        self.db.delete(db_project)
+        self.db.commit()
+        return True

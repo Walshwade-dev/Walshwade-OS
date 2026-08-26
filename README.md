@@ -17,6 +17,8 @@ docker compose up -d
 ```
 *(Note: The database runs on port `5433` to prevent conflicts with local Postgres instances).*
 
+Copy `.env.example` to `.env` before starting the database and API. Set a private `API_KEY`; use the same value as `NEXT_PUBLIC_API_KEY` in `frontend/.env.local`.
+
 ---
 
 ## 2. Start the Backend API (FastAPI)
@@ -25,7 +27,7 @@ Open a new terminal window, navigate to the `backend` directory, activate the vi
 ```bash
 cd backend
 source venv/bin/activate
-uvicorn app.main:app --reload
+PYTHONPATH=. uvicorn app.main:app --reload
 ```
 
 - **API URL:** [http://localhost:8000](http://localhost:8000)
@@ -38,7 +40,14 @@ Open another terminal window, navigate to the `frontend` directory, and start th
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
 - **Frontend URL:** [http://localhost:3000](http://localhost:3000)
+
+## Security and production
+
+All Wade OS API routes require the `X-API-Key` header; only `/health` is public. For production, set `ENV=production`, `DEBUG=False`, a strong `API_KEY`, and `CORS_ORIGINS` to the deployed frontend origin in the platform environment settings. Never commit `.env` or frontend environment files.
+
+See [SETUP.md](SETUP.md) for the complete local, migration, audit, and deployment checklist.

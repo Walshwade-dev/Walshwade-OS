@@ -1,12 +1,14 @@
 from datetime import date, datetime
 from typing import Dict, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.models.task import Task, TaskStatusEnum
 from app.models.work_session import WorkSession, WorkSessionStatusEnum
 from app.models.time_block import TimeBlock
 from app.models.weekly_plan import WeeklyPlan, WeeklyPlanTask
+from app.models.skill_evidence import SkillEvidence
+from app.models.job_opportunity import JobOpportunity, JobOpportunityStatusEnum
+from app.services.skill_gap_service import compare_job_skills
 
 class KPIService:
     def __init__(self, db: Session):
@@ -131,4 +133,63 @@ class KPIService:
             "weekly_used_capacity": weekly_used_capacity,
             "weekly_available_capacity": weekly_available,
             "overcommitment": overcommitment
+        }
+
+    def get_learning_kpis(self, start_date: date, end_date: date) -> Dict[str, Any]:
+        sessions = self.db.query(WorkSession.actual_duration_minutes).join(TimeBlock).filter(
+            TimeBlock.date >= start_date,
+            TimeBlock.date <= end_date,
+            WorkSession.status == WorkSessionStatusEnum.completed,
+        ).all()
+
+        learning_hours = sum((s.actual_duration_minutes or 0) for s in sessions) / 60
+
+        evidence_count = self.db.query(SkillEvidence.id).filter(
+            SkillEvidence.created_at >= datetime.combine(start_date, datetime.min.time()),
+            SkillEvidence.created_at <= datetime.combine(end_date, datetime.max.time()),
+        ).count()
+
+        return {
+            "learning_hours": round(learning_hours, 2),
+            "evidence_produced": evidence_count,
+        }
+
+    def get_career_kpis(self) -> Dict[str, Any]:
+        opportunities = self.db.query(JobOpportunity).all()
+        applications = self.db.query(JobOpportunity).filter(
+            JobOpportunity.status.in_([
+                JobOpportunityStatusEnum.applied,
+                JobOpportunityStatusEnum.interviewing,
+                JobOpportunityStatusEnum.offer,
+            ])
+        ).count()
+
+        from app.models.skill import Skill
+        all_skills = self.db.query(Skill).all()
+        skill_gap_values = []
+        for opportunity in opportunities:
+            result = compare_job_skills(opportunity, all_skills)
+            skill_gap_values.append(result["match_percentage"])
+
+        avg_skill_gap = round(sum(skill_gap_values) / len(skill_gap_values), 2) if skill_gap_values else 0.0
+
+        return {
+            "relevant_opportunities": len(opportunities),
+            "applications": applications,
+            "avg_skill_gap": avg_skill_gap,
+        }
+
+    def get_dashboard_kpis(self, start_date: date, end_date: date, weekly_plan_id: str = None) -> Dict[str, Any]:
+        exec_kpis = self.get_execution_kpis(start_date, end_date)
+        time_kpis = self.get_time_kpis(start_date, end_date)
+        plan_kpis = {}
+        if weekly_plan_id:
+            plan_kpis = self.get_planning_kpis(weekly_plan_id)
+
+        return {
+            "execution": exec_kpis,
+            "time": time_kpis,
+            "planning": plan_kpis,
+            "learning": self.get_learning_kpis(start_date, end_date),
+            "career": self.get_career_kpis(),
         }

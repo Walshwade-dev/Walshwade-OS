@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.kpi_service import KPIService
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/kpis", tags=["KPIs"])
+router = APIRouter(prefix="/kpis", tags=["KPIs"], dependencies=[Depends(verify_api_key)])
 
 @router.get("/execution")
 def get_execution_kpis(start_date: date, end_date: date, db: Session = Depends(get_db)) -> Dict[str, Any]:
@@ -23,6 +24,16 @@ def get_planning_kpis(weekly_plan_id: str, db: Session = Depends(get_db)) -> Dic
     service = KPIService(db)
     return service.get_planning_kpis(weekly_plan_id)
 
+@router.get("/learning")
+def get_learning_kpis(start_date: date, end_date: date, db: Session = Depends(get_db)) -> Dict[str, Any]:
+    service = KPIService(db)
+    return service.get_learning_kpis(start_date, end_date)
+
+@router.get("/career")
+def get_career_kpis(db: Session = Depends(get_db)) -> Dict[str, Any]:
+    service = KPIService(db)
+    return service.get_career_kpis()
+
 @router.get("/dashboard")
 def get_dashboard_kpis(start_date: date, end_date: date, weekly_plan_id: str = None, db: Session = Depends(get_db)) -> Dict[str, Any]:
     service = KPIService(db)
@@ -36,5 +47,7 @@ def get_dashboard_kpis(start_date: date, end_date: date, weekly_plan_id: str = N
     return {
         "execution": exec_kpis,
         "time": time_kpis,
-        "planning": plan_kpis
+        "planning": plan_kpis,
+        "learning": service.get_learning_kpis(start_date, end_date),
+        "career": service.get_career_kpis(),
     }

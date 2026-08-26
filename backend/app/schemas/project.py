@@ -12,6 +12,11 @@ class ProjectBase(BaseModel):
 class ProjectCreate(ProjectBase):
     goal_id: UUID
 
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[ProjectStatusEnum] = None
+
 class ProjectResponse(ProjectBase):
     id: UUID
     goal_id: UUID

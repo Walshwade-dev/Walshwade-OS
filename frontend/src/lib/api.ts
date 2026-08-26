@@ -1,11 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
+        ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
     },
 });
 
@@ -50,6 +52,43 @@ export interface WeeklyPlan {
     tasks?: Task[];
 }
 
+export interface Skill {
+    id: string;
+    name: string;
+    domain: string;
+    proficiency_level: string;
+    created_at: string;
+}
+
+export interface SkillEvidence {
+    id: string;
+    skill_id: string;
+    task_id?: string;
+    title: string;
+    description?: string;
+    evidence_url?: string;
+    created_at: string;
+}
+
+export interface JobOpportunity {
+    id: string;
+    title: string;
+    company: string;
+    url?: string;
+    required_skills: string[];
+    status: 'interested' | 'applied' | 'interviewing' | 'rejected' | 'offer' | 'withdrawn';
+    created_at: string;
+}
+
+export interface ContentItem {
+    id: string;
+    title: string;
+    description?: string;
+    source_task_id?: string;
+    status: 'idea' | 'draft' | 'published';
+    created_at: string;
+}
+
 export const fetchGoals = async (): Promise<Goal[]> => {
     const response = await api.get('/goals/');
     return response.data;
@@ -78,6 +117,33 @@ export const fetchTasks = async (projectId?: string): Promise<Task[]> => {
 export const createTask = async (data: Partial<Task>): Promise<Task> => {
     const response = await api.post('/tasks/', data);
     return response.data;
+};
+
+export const updateGoal = async (goalId: string, data: Partial<Goal>): Promise<Goal> => {
+    const response = await api.patch(`/goals/${goalId}`, data);
+    return response.data;
+};
+
+export const deleteGoal = async (goalId: string): Promise<void> => {
+    await api.delete(`/goals/${goalId}`);
+};
+
+export const updateProject = async (projectId: string, data: Partial<Project>): Promise<Project> => {
+    const response = await api.patch(`/projects/${projectId}`, data);
+    return response.data;
+};
+
+export const deleteProject = async (projectId: string): Promise<void> => {
+    await api.delete(`/projects/${projectId}`);
+};
+
+export const updateTask = async (taskId: string, data: Partial<Task>): Promise<Task> => {
+    const response = await api.patch(`/tasks/${taskId}`, data);
+    return response.data;
+};
+
+export const deleteTask = async (taskId: string): Promise<void> => {
+    await api.delete(`/tasks/${taskId}`);
 };
 
 export const fetchWeeklyPlans = async (): Promise<WeeklyPlan[]> => {
@@ -236,10 +302,75 @@ export const submitWeeklyReview = async (review: WeeklyReview): Promise<WeeklyRe
     return response.data;
 };
 
+export const fetchSkills = async (): Promise<Skill[]> => {
+    const response = await api.get('/skills/');
+    return response.data;
+};
+
+export const createSkill = async (data: Partial<Skill>): Promise<Skill> => {
+    const response = await api.post('/skills/', data);
+    return response.data;
+};
+
+export const fetchSkillEvidence = async (skillId?: string): Promise<SkillEvidence[]> => {
+    const response = await api.get('/skills/skill-evidence', { params: { skill_id: skillId } });
+    return response.data;
+};
+
+export const createSkillEvidence = async (data: Partial<SkillEvidence>): Promise<SkillEvidence> => {
+    const response = await api.post('/skills/skill-evidence', data);
+    return response.data;
+};
+
+export const fetchJobOpportunities = async (): Promise<JobOpportunity[]> => {
+    const response = await api.get('/job-opportunities/');
+    return response.data;
+};
+
+export const createJobOpportunity = async (data: Partial<JobOpportunity>): Promise<JobOpportunity> => {
+    const response = await api.post('/job-opportunities/', data);
+    return response.data;
+};
+
+export const updateJobOpportunityStatus = async (jobId: string, status: string): Promise<JobOpportunity> => {
+    const response = await api.patch(`/job-opportunities/${jobId}/status`, { status });
+    return response.data;
+};
+
+export const fetchJobSkillGap = async (jobId: string): Promise<{ matched: string[]; missing: string[]; match_percentage: number }> => {
+    const response = await api.get(`/job-opportunities/${jobId}/skill-gap`);
+    return response.data;
+};
+
+export const fetchContentItems = async (status?: string): Promise<ContentItem[]> => {
+    const response = await api.get('/content-items/', { params: { status } });
+    return response.data;
+};
+
+export const createContentItem = async (data: Partial<ContentItem>): Promise<ContentItem> => {
+    const response = await api.post('/content-items/', data);
+    return response.data;
+};
+
+export const updateContentItemStatus = async (contentId: string, status: string): Promise<ContentItem> => {
+    const response = await api.patch(`/content-items/${contentId}/status`, { status });
+    return response.data;
+};
+
 export const fetchDashboardKPIs = async (startDate: string, endDate: string, weeklyPlanId?: string): Promise<any> => {
     const params: any = { start_date: startDate, end_date: endDate };
     if (weeklyPlanId) params.weekly_plan_id = weeklyPlanId;
     const response = await api.get('/kpis/dashboard', { params });
+    return response.data;
+};
+
+export const fetchLearningKPIs = async (startDate: string, endDate: string): Promise<any> => {
+    const response = await api.get('/kpis/learning', { params: { start_date: startDate, end_date: endDate } });
+    return response.data;
+};
+
+export const fetchCareerKPIs = async (): Promise<any> => {
+    const response = await api.get('/kpis/career');
     return response.data;
 };
 

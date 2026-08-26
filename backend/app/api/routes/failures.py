@@ -11,8 +11,9 @@ from app.repositories.corrective_action import CorrectiveActionRepository
 from app.models.task import Task, TaskStatusEnum
 from app.models.work_session import WorkSession, WorkSessionStatusEnum
 from datetime import datetime
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/failures", tags=["Failures"])
+router = APIRouter(prefix="/failures", tags=["Failures"], dependencies=[Depends(verify_api_key)])
 
 @router.post("/", response_model=FailureResponse, status_code=status.HTTP_201_CREATED)
 def create_failure(failure_in: FailureCreate, db: Session = Depends(get_db)):

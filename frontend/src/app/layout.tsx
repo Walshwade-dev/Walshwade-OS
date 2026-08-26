@@ -1,21 +1,8 @@
 import type { Metadata } from "next";
-import { Rajdhani, Orbitron } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import Sidebar from "@/components/Sidebar";
 import Greeting from "@/components/Greeting";
-
-const rajdhani = Rajdhani({ 
-  subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-rajdhani'
-});
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ['400', '700', '900'],
-  variable: '--font-orbitron'
-});
 
 export const metadata: Metadata = {
   title: "Project Wade OS",
@@ -28,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${rajdhani.variable} ${orbitron.variable}`}>
+    <html lang="en">
       <body className="antialiased text-lg flex flex-col md:flex-row h-screen overflow-hidden">
         <Providers>
           <Sidebar />

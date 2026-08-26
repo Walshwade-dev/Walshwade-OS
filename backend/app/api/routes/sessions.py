@@ -9,8 +9,9 @@ from app.repositories.work_session import WorkSessionRepository
 from app.repositories.time_block import TimeBlockRepository
 from app.schemas.work_session import WorkSessionResponse, WorkSessionCreate, WorkSessionUpdate
 from app.models.work_session import WorkSessionStatusEnum
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/sessions", tags=["Sessions"])
+router = APIRouter(prefix="/sessions", tags=["Sessions"], dependencies=[Depends(verify_api_key)])
 
 class CreateSessionRequest(BaseModel):
     time_block_id: UUID

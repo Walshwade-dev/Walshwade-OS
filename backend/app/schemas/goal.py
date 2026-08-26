@@ -13,6 +13,12 @@ class GoalBase(BaseModel):
 class GoalCreate(GoalBase):
     pass
 
+class GoalUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    domain: Optional[DomainEnum] = None
+    status: Optional[GoalStatusEnum] = None
+
 class GoalResponse(GoalBase):
     id: UUID
     created_at: datetime

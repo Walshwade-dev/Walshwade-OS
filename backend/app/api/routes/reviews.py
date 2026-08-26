@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.review import DailyReviewCreate, DailyReviewResponse, WeeklyReviewCreate, WeeklyReviewResponse
 from app.repositories.review import DailyReviewRepository, WeeklyReviewRepository
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/reviews", tags=["Reviews"])
+router = APIRouter(prefix="/reviews", tags=["Reviews"], dependencies=[Depends(verify_api_key)])
 
 @router.post("/daily", response_model=DailyReviewResponse, status_code=status.HTTP_200_OK)
 def create_daily_review(review_in: DailyReviewCreate, db: Session = Depends(get_db)):

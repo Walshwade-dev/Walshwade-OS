@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wade OS Frontend
 
-## Getting Started
+This is the Next.js frontend for Project Wade OS. It provides the UI for goals, projects, tasks, weekly plans, execution sessions, reviews, skills, career opportunities, content items, and dashboard KPIs.
 
-First, run the development server:
+## Local development
+
+Create `frontend/.env.local` from `.env.example`. Set `NEXT_PUBLIC_API_URL` to the backend `/api/v1` URL and set `NEXT_PUBLIC_API_KEY` to the same single-user key configured in the backend.
+
+Install dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app is available at [http://localhost:3000](http://localhost:3000). The backend must be running separately; see the root [SETUP.md](../SETUP.md).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Verification
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run lint
+npm audit --omit=dev
+```
 
-## Learn More
+The production build currently passes. Lint has documented pre-existing findings in [FRONTEND_LOG.md](FRONTEND_LOG.md); the API-key transport change is covered by the production build.
 
-To learn more about Next.js, take a look at the following resources:
+## Production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy the frontend to Vercel or another Next.js-compatible host. Configure `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_API_KEY` as build-time environment variables. The API key is visible in the browser bundle, which is acceptable only for this explicitly single-user MVP.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For the complete backend, database, security, and deployment instructions, see the root [SETUP.md](../SETUP.md).

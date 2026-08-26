@@ -18,3 +18,6 @@
 | 2026-08-19 | Navigation | Added `/today` link to sidebar navigation panel | Done |
 | 2026-08-19 | Execution UI | Built `/today` active dashboard showing dynamic schedule timeline | Done |
 | 2026-08-19 | Session State | Wired interactive controls (Start/Pause/Resume/Complete) to API mutations | Done |
+| 2026-08-26 | Day 4 UI | Added skills, career opportunities, and content views plus dashboard learning/career metrics. | Done |
+| 2026-08-26 | API security | Configured Axios to use `NEXT_PUBLIC_API_URL` and send the backend `X-API-Key` on every request. | Done |
+| 2026-08-26 | Verification | Production build passes; current lint findings are recorded in `FRONTEND_LOG.md` and deferred from the MVP hardening scope. | Done |

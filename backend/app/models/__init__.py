@@ -8,5 +8,26 @@ from app.models.work_session import WorkSession
 from app.models.review import DailyReview, WeeklyReview
 from app.models.failure import Failure
 from app.models.corrective_action import CorrectiveAction
+from app.models.skill import Skill
+from app.models.skill_evidence import SkillEvidence
+from app.models.job_opportunity import JobOpportunity
+from app.models.content_item import ContentItem
 
-__all__ = ["Base", "Goal", "Project", "Task", "WeeklyPlan", "WeeklyPlanTask", "TimeBlock", "WorkSession", "DailyReview", "WeeklyReview", "Failure", "CorrectiveAction"]
+__all__ = [
+    "Base",
+    "Goal",
+    "Project",
+    "Task",
+    "WeeklyPlan",
+    "WeeklyPlanTask",
+    "TimeBlock",
+    "WorkSession",
+    "DailyReview",
+    "WeeklyReview",
+    "Failure",
+    "CorrectiveAction",
+    "Skill",
+    "SkillEvidence",
+    "JobOpportunity",
+    "ContentItem",
+]

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Target, FolderKanban, CheckSquare, CalendarDays, Menu, Zap, Activity, FileText } from 'lucide-react';
+import { Target, FolderKanban, CheckSquare, CalendarDays, Menu, Zap, Activity, FileText, BrainCircuit, BriefcaseBusiness, NotebookText } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 
@@ -14,6 +14,9 @@ const navItems = [
   { href: '/projects', label: 'Projects', icon: FolderKanban },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/weekly-plans', label: 'Weekly Plans', icon: CalendarDays },
+  { href: '/skills', label: 'Skills', icon: BrainCircuit },
+  { href: '/career', label: 'Career', icon: BriefcaseBusiness },
+  { href: '/content', label: 'Content', icon: NotebookText },
 ];
 
 export default function Sidebar() {

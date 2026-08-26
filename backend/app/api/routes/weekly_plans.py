@@ -8,8 +8,9 @@ from app.core.database import get_db
 from app.schemas.weekly_plan import WeeklyPlanCreate, WeeklyPlanResponse, WeeklyPlanWithTasksResponse, WeeklyPlanTaskAttach
 from app.repositories.weekly_plan import WeeklyPlanRepository
 from app.repositories.task import TaskRepository
+from app.core.security import verify_api_key
 
-router = APIRouter(prefix="/weekly-plans", tags=["weekly_plans"])
+router = APIRouter(prefix="/weekly-plans", tags=["weekly_plans"], dependencies=[Depends(verify_api_key)])
 
 @router.post("/", response_model=WeeklyPlanResponse, status_code=status.HTTP_201_CREATED)
 def create_weekly_plan(weekly_plan: WeeklyPlanCreate, db: Session = Depends(get_db)):

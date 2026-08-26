@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from app.models.task import Task
-from app.schemas.task import TaskCreate
+from app.schemas.task import TaskCreate, TaskUpdate
 
 class TaskRepository:
     def __init__(self, db: Session):
@@ -23,3 +23,23 @@ class TaskRepository:
         self.db.commit()
         self.db.refresh(db_task)
         return db_task
+
+    def update(self, task_id: UUID, task_update: TaskUpdate) -> Optional[Task]:
+        db_task = self.get(task_id)
+        if not db_task:
+            return None
+
+        for field, value in task_update.model_dump(exclude_unset=True).items():
+            setattr(db_task, field, value)
+
+        self.db.commit()
+        self.db.refresh(db_task)
+        return db_task
+
+    def delete(self, task_id: UUID) -> bool:
+        db_task = self.get(task_id)
+        if not db_task:
+            return False
+        self.db.delete(db_task)
+        self.db.commit()
+        return True
