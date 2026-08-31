@@ -28,7 +28,12 @@ def generate_schedule(req: GenerateScheduleRequest, db: Session = Depends(get_db
     # 2. Get current active Weekly Plan (most recent one for simplicity)
     plans = wp_repo.get_all()
     if not plans:
-        raise HTTPException(status_code=400, detail="No active weekly plan found.")
+        return {
+            "message": "No active weekly plan found. Awaiting weekly plan creation.",
+            "overcommitted": False,
+            "unscheduled_task_ids": [],
+            "time_blocks_count": 0
+        }
     active_plan = wp_repo.get(plans[0].id)
     
     # 3. Extract planned tasks that are attached to this weekly plan

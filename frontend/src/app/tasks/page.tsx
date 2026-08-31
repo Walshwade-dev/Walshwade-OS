@@ -38,7 +38,7 @@ export default function TasksPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate({ title, description, project_id: projectId, priority, status: 'todo' });
+    mutation.mutate({ title, description, project_id: projectId, priority, status: 'backlog' });
   };
 
   const failureMutation = useMutation({

@@ -11,6 +11,15 @@ export const api = axios.create({
     },
 });
 
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    console.error('AXIOS ERROR URL:', err.config?.url, 'METHOD:', err.config?.method);
+    return Promise.reject(err);
+  }
+);
+
+
 export interface Goal {
     id: string;
     title: string;
@@ -125,7 +134,11 @@ export const updateGoal = async (goalId: string, data: Partial<Goal>): Promise<G
 };
 
 export const deleteGoal = async (goalId: string): Promise<void> => {
-    await api.delete(`/goals/${goalId}`);
+    try {
+        await api.delete(`/goals/${goalId}`);
+    } catch (error: any) {
+        if (error.response?.status !== 404) throw error;
+    }
 };
 
 export const updateProject = async (projectId: string, data: Partial<Project>): Promise<Project> => {
@@ -134,7 +147,11 @@ export const updateProject = async (projectId: string, data: Partial<Project>): 
 };
 
 export const deleteProject = async (projectId: string): Promise<void> => {
-    await api.delete(`/projects/${projectId}`);
+    try {
+        await api.delete(`/projects/${projectId}`);
+    } catch (error: any) {
+        if (error.response?.status !== 404) throw error;
+    }
 };
 
 export const updateTask = async (taskId: string, data: Partial<Task>): Promise<Task> => {
@@ -143,7 +160,11 @@ export const updateTask = async (taskId: string, data: Partial<Task>): Promise<T
 };
 
 export const deleteTask = async (taskId: string): Promise<void> => {
-    await api.delete(`/tasks/${taskId}`);
+    try {
+        await api.delete(`/tasks/${taskId}`);
+    } catch (error: any) {
+        if (error.response?.status !== 404) throw error;
+    }
 };
 
 export const fetchWeeklyPlans = async (): Promise<WeeklyPlan[]> => {
@@ -299,6 +320,11 @@ export const fetchDailyReviews = async (): Promise<DailyReview[]> => {
 
 export const submitWeeklyReview = async (review: WeeklyReview): Promise<WeeklyReview> => {
     const response = await api.post('/reviews/weekly', review);
+    return response.data;
+};
+
+export const fetchWeeklyReviews = async (): Promise<WeeklyReview[]> => {
+    const response = await api.get('/reviews/weekly');
     return response.data;
 };
 

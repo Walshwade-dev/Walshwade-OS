@@ -48,8 +48,12 @@ export default function TodayPage() {
   const generateMutation = useMutation({
     mutationFn: (date: string) => generateSchedule(date),
     onSuccess: (data) => {
-      setOvercommittedTasks(data.unscheduled_task_ids);
-      queryClient.invalidateQueries({ queryKey: ['today-schedule'] });
+      if (data.message && data.message.includes("No active weekly plan")) {
+        alert(data.message);
+      } else {
+        setOvercommittedTasks(data.unscheduled_task_ids);
+        queryClient.invalidateQueries({ queryKey: ['today-schedule'] });
+      }
       setIsGenerating(false);
     },
     onError: () => setIsGenerating(false)

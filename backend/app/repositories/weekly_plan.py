@@ -29,6 +29,13 @@ class WeeklyPlanRepository:
     def attach_task(self, weekly_plan_id: UUID, task_id: UUID) -> WeeklyPlanTask:
         db_weekly_plan_task = WeeklyPlanTask(weekly_plan_id=weekly_plan_id, task_id=task_id)
         self.db.add(db_weekly_plan_task)
+        
+        # Transition task status to planned if it is currently backlog
+        from app.models.task import TaskStatusEnum
+        task = self.db.query(Task).filter(Task.id == task_id).first()
+        if task and task.status == TaskStatusEnum.backlog:
+            task.status = TaskStatusEnum.planned
+            
         self.db.commit()
         self.db.refresh(db_weekly_plan_task)
         return db_weekly_plan_task

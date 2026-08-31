@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, CalendarDays, CheckCircle2 } from 'lucide-react';
-import { fetchDailyReviews, submitDailyReview, fetchWeeklyPlans, submitWeeklyReview } from '@/lib/api';
+import { fetchDailyReviews, submitDailyReview, fetchWeeklyPlans, submitWeeklyReview, fetchWeeklyReviews } from '@/lib/api';
 
 export default function ReviewsPage() {
   const queryClient = useQueryClient();
@@ -23,16 +23,9 @@ export default function ReviewsPage() {
     queryFn: fetchWeeklyPlans,
   });
 
-  // Mocking weekly reviews fetch since the endpoint doesn't return full list in api.ts right now.
-  // Actually, wait, I can just not list them or quickly fetch them if I added them to api.ts, but let's just focus on Daily.
-  // I didn't add fetchWeeklyReviews to api.ts, but the backend route exists. I'll add a quick fetcher here.
-  const fetchWeeklyReviewsList = async () => {
-      const response = await fetch('http://localhost:8000/api/v1/reviews/weekly');
-      return response.json();
-  };
   const { data: weeklyReviews } = useQuery({
       queryKey: ['weekly-reviews'],
-      queryFn: fetchWeeklyReviewsList
+      queryFn: fetchWeeklyReviews
   });
 
   const dailyMutation = useMutation({
