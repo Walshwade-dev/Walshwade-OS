@@ -115,8 +115,11 @@ export default function GoalsPage() {
             </div>
           </div>
         ) : error ? (
-          <div className="p-4 bg-critical/20 border border-critical/50 text-critical rounded-lg">
-            System Error: Unable to retrieve databanks.
+          <div className="p-4 bg-critical/20 border border-critical/50 text-critical rounded-lg space-y-1">
+            <div className="font-bold">System Error: Unable to retrieve databanks.</div>
+            <div className="text-xs font-mono opacity-80">
+              Details: {(error as any)?.response?.data?.detail || (error as any)?.message || 'Network/API connection failure.'}
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
