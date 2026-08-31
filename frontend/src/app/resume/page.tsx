@@ -8,11 +8,11 @@ import { useState } from 'react';
 export default function ResumePage() {
   const [copied, setCopied] = useState(false);
 
-  const { data: skills } = useQuery({ queryKey: ['skills'], queryFn: fetchSkills });
+  const { data: skills } = useQuery({ queryKey: ['skills'], queryFn: () => fetchSkills() });
   const { data: evidence } = useQuery({ queryKey: ['skill-evidence'], queryFn: () => fetchSkillEvidence() });
   const { data: publishedContent } = useQuery({ queryKey: ['content-items', 'published'], queryFn: () => fetchContentItems('published') });
-  const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: fetchGoals });
-  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: fetchProjects });
+  const { data: goals } = useQuery({ queryKey: ['goals'], queryFn: () => fetchGoals() });
+  const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: () => fetchProjects() });
 
   const copyShareLink = () => {
     if (typeof window !== 'undefined') {
