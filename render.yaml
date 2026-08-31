@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: wade-os-backend
+    env: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: API_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["*"]'
