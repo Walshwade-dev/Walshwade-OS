@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentItems, ContentItem } from '@/lib/api';
 import { BookOpen, Calendar, ArrowRight, Share2 } from 'lucide-react';
 import { useState } from 'react';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 export default function BlogPage() {
   const [copied, setCopied] = useState(false);
@@ -22,7 +23,7 @@ export default function BlogPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      <div className="border-b border-panel-border pb-6 flex items-center justify-between gap-4">
+      <div className="border-b border-panel-border pb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <BookOpen size={36} className="text-warning" />
           <div>
@@ -42,21 +43,33 @@ export default function BlogPage() {
       {isLoading ? (
         <div className="text-slate-400 py-10 text-center">Loading engineering stream...</div>
       ) : (
-        <div className="space-y-6">
-          {publishedItems?.map((post: ContentItem) => (
-            <div key={post.id} className="glass-panel p-8 hover:border-warning/50 transition-all space-y-4">
-              <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-                <span className="flex items-center gap-1"><Calendar size={14} /> Published</span>
-                <span className="px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/30 uppercase">Verified Article</span>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-100">{post.title}</h2>
-              {post.description && (
-                <p className="font-body text-slate-300 leading-relaxed whitespace-pre-wrap">
-                  {post.description}
-                </p>
-              )}
-            </div>
-          ))}
+        <div className="space-y-8">
+          {publishedItems?.map((post: ContentItem) => {
+            const wordCount = post.description ? post.description.trim().split(/\s+/).length : 0;
+            const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
+            return (
+              <article key={post.id} className="glass-panel p-8 hover:border-warning/50 transition-all space-y-6">
+                <div className="flex items-center justify-between text-xs text-slate-400 font-mono border-b border-slate-800 pb-3">
+                  <span className="flex items-center gap-2 text-warning">
+                    <Calendar size={14} /> Published Article • {readTime} min read
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-warning/10 text-warning border border-warning/30 uppercase font-mono tracking-wider">
+                    Verified
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight leading-tight">
+                  {post.title}
+                </h2>
+                {post.description && (
+                  <div className="pt-2">
+                    <MarkdownRenderer content={post.description} />
+                  </div>
+                )}
+              </article>
+            );
+          })}
+
 
           {(!publishedItems || publishedItems.length === 0) && (
             <div className="glass-panel p-12 text-center text-slate-400 space-y-3">

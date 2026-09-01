@@ -10,13 +10,16 @@ def get_priority_weight(priority: str) -> int:
     }
     return weights.get(priority, 0)
 
-def generate_daily_schedule(target_date: date, daily_capacity_minutes: int, tasks: List[Any]) -> Dict[str, Any]:
+def generate_daily_schedule(
+    target_date: date, 
+    daily_capacity_minutes: int, 
+    tasks: List[Any], 
+    start_time_offset: time = time(8, 0)
+) -> Dict[str, Any]:
     """
     Pure function to generate a daily schedule deterministically.
     """
     DEFAULT_DURATION = 30
-    START_HOUR = 8
-    START_MINUTE = 0
 
     # Sort tasks: deadline ascending (None is far future), then priority descending
     # Using a high date for None deadlines so they sort last
@@ -33,7 +36,7 @@ def generate_daily_schedule(target_date: date, daily_capacity_minutes: int, task
     time_blocks = []
     unscheduled_task_ids = []
     
-    current_dt = datetime.combine(target_date, time(START_HOUR, START_MINUTE))
+    current_dt = datetime.combine(target_date, start_time_offset)
     used_minutes = 0
 
     for task in sorted_tasks:
@@ -60,3 +63,4 @@ def generate_daily_schedule(target_date: date, daily_capacity_minutes: int, task
         "unscheduled_task_ids": unscheduled_task_ids,
         "overcommitted": len(unscheduled_task_ids) > 0
     }
+

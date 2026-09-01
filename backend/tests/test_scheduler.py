@@ -60,3 +60,22 @@ def test_scheduler_sorting():
     assert blocks[0]["task_id"] == str(tasks[1].id)
     assert blocks[1]["task_id"] == str(tasks[0].id)
     assert blocks[2]["task_id"] == str(tasks[2].id)
+
+def test_scheduler_with_offset_and_reduced_capacity():
+    # 90 minutes already spent (e.g. 1h30m completed task), remaining capacity = 270 mins
+    # offset start_time = 9:30 AM
+    tasks = [
+        MockTask(priority="high", estimated_duration_minutes=60)
+    ]
+    result = generate_daily_schedule(
+        date(2026, 8, 20), 
+        270, 
+        tasks, 
+        start_time_offset=time(9, 30)
+    )
+    
+    assert result["overcommitted"] is False
+    assert len(result["time_blocks"]) == 1
+    assert result["time_blocks"][0]["start_time"] == time(9, 30)
+    assert result["time_blocks"][0]["end_time"] == time(10, 30)
+

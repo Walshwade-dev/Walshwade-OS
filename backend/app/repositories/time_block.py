@@ -33,3 +33,10 @@ class TimeBlockRepository:
     def delete_by_date(self, target_date: date) -> None:
         self.db.query(TimeBlock).filter(TimeBlock.date == target_date).delete()
         self.db.commit()
+
+    def delete_pending_blocks(self, target_date: date, preserve_ids: List[UUID]) -> None:
+        query = self.db.query(TimeBlock).filter(TimeBlock.date == target_date)
+        if preserve_ids:
+            query = query.filter(TimeBlock.id.notin_(preserve_ids))
+        query.delete(synchronize_session=False)
+        self.db.commit()

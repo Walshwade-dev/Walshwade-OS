@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Play, Pause, Square, Zap, Clock, AlertTriangle, X } from 'lucide-react';
+import { Play, Pause, Square, Zap, Clock, AlertTriangle, X, Edit3, CheckCircle2 } from 'lucide-react';
 import { 
   fetchTodaySchedule, 
   fetchActiveSession, 
@@ -31,6 +31,25 @@ export default function TodayPage() {
   const [failureType, setFailureType] = useState<FailureType>('other');
   const [failureDescription, setFailureDescription] = useState('');
   const [correctiveAction, setCorrectiveAction] = useState('');
+
+  // Custom Key In Start Time Modal State
+  const [customTimeModalState, setCustomTimeModalState] = useState<{
+    isOpen: boolean;
+    blockId: string;
+    taskTitle: string;
+    plannedDuration: number;
+    startTimeStr: string;
+  }>({
+    isOpen: false,
+    blockId: '',
+    taskTitle: '',
+    plannedDuration: 30,
+    startTimeStr: ''
+  });
+  const [customIsCompleted, setCustomIsCompleted] = useState(false);
+  const [customActualMinutes, setCustomActualMinutes] = useState(30);
+  const [customNotes, setCustomNotes] = useState('');
+
 
   const [showEODReview, setShowEODReview] = useState(false);
   const [eodReviewNotes, setEodReviewNotes] = useState('');
@@ -75,6 +94,49 @@ export default function TodayPage() {
       queryClient.invalidateQueries({ queryKey: ['active-session'] });
     }
   });
+
+  const customStartMutation = useMutation({
+    mutationFn: async ({
+      blockId,
+      customStartTime,
+      isCompleted,
+      actualDurationMinutes,
+      notes
+    }: {
+      blockId: string;
+      customStartTime: string;
+      isCompleted: boolean;
+      actualDurationMinutes: number;
+      notes?: string;
+    }) => {
+      const session = await createSession(blockId);
+      const startedSession = await startSession(session.id, customStartTime);
+      if (isCompleted) {
+        return completeSession(startedSession.id, notes, actualDurationMinutes);
+      }
+      return startedSession;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['today-schedule'] });
+      queryClient.invalidateQueries({ queryKey: ['active-session'] });
+      setCustomTimeModalState({ isOpen: false, blockId: '', taskTitle: '', plannedDuration: 30, startTimeStr: '' });
+    }
+  });
+
+  const openCustomTimeModal = (block: TimeBlock) => {
+    const defaultTime = block.start_time ? block.start_time.substring(0, 5) : new Date().toTimeString().substring(0, 5);
+    setCustomTimeModalState({
+      isOpen: true,
+      blockId: block.id,
+      taskTitle: block.task?.title || 'Scheduled Directive',
+      plannedDuration: block.planned_duration_minutes,
+      startTimeStr: defaultTime,
+    });
+    setCustomIsCompleted(false);
+    setCustomActualMinutes(block.planned_duration_minutes);
+    setCustomNotes('');
+  };
+
 
   const actionMutation = useMutation({
     mutationFn: async ({ action, sessionId }: { action: 'pause' | 'resume' | 'complete', sessionId: string }) => {
@@ -297,22 +359,45 @@ export default function TodayPage() {
                 {/* Content */}
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-slate-100">{block.task?.title}</h3>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-slate-500 font-bold uppercase tracking-wider">
-                    <span className="bg-slate-800 px-2 py-1 rounded">{block.planned_duration_minutes}m</span>
-                    {session && <span className={`px-2 py-1 rounded ${session.status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'}`}>{session.status}</span>}
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs font-mono uppercase tracking-wider">
+                    {session?.actual_duration_minutes ? (
+                      <span className="bg-green-500/20 text-green-400 px-2.5 py-1 rounded font-bold border border-green-500/30 flex items-center gap-1">
+                        <Clock size={12} /> Executed: {Math.floor(session.actual_duration_minutes / 60) > 0 ? `${Math.floor(session.actual_duration_minutes / 60)}h ${session.actual_duration_minutes % 60}m` : `${session.actual_duration_minutes}m`} ({block.planned_duration_minutes}m planned)
+                      </span>
+                    ) : (
+                      <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded flex items-center gap-1">
+                        <Clock size={12} /> Planned: {block.planned_duration_minutes}m
+                      </span>
+                    )}
+                    {session && (
+                      <span className={`px-2 py-1 rounded font-bold ${session.status === 'completed' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-primary/20 text-primary border border-primary/30'}`}>
+                        {session.status}
+                      </span>
+                    )}
                   </div>
+
                 </div>
                 
                 {/* Controls */}
                 <div className="flex gap-2">
                   {!session && !activeSession && (
-                    <button 
-                      onClick={() => createAndStartMutation.mutate(block.id)}
-                      className="px-4 py-2 bg-slate-800 text-primary font-bold tracking-wider uppercase text-xs rounded hover:bg-slate-700 transition-colors flex items-center gap-2"
-                    >
-                      <Play size={14} /> Start
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <button 
+                        onClick={() => createAndStartMutation.mutate(block.id)}
+                        className="px-3.5 py-2 bg-slate-800 text-primary font-bold tracking-wider uppercase text-xs rounded hover:bg-slate-700 transition-colors flex items-center gap-1.5 border border-primary/30"
+                      >
+                        <Play size={14} /> Start Now
+                      </button>
+                      <button 
+                        onClick={() => openCustomTimeModal(block)}
+                        className="px-3.5 py-2 bg-amber-500/10 text-amber-300 font-bold tracking-wider uppercase text-xs rounded hover:bg-amber-500/20 transition-colors flex items-center gap-1.5 border border-amber-500/30"
+                        title="Key in custom start time or log past execution"
+                      >
+                        <Edit3 size={14} /> Key In Time
+                      </button>
+                    </div>
                   )}
+
                   {session?.status === 'started' && (
                     <button onClick={() => actionMutation.mutate({ action: 'pause', sessionId: session.id })} className="p-2 bg-slate-800 text-warning rounded hover:bg-slate-700 transition-colors">
                       <Pause size={16} />
@@ -438,7 +523,115 @@ export default function TodayPage() {
           </div>
         </div>
       )}
+      {/* Custom Key-In Start Time Modal */}
+      {customTimeModalState.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="glass-panel w-full max-w-md p-6 relative space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h2 className="text-lg font-bold text-slate-100 uppercase tracking-wide flex items-center gap-2">
+                <Edit3 size={18} className="text-warning" /> Key In Start Time
+              </h2>
+              <button 
+                onClick={() => setCustomTimeModalState(prev => ({ ...prev, isOpen: false }))} 
+                className="text-slate-500 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div>
+              <p className="text-xs text-slate-400 font-mono">Directive:</p>
+              <h3 className="text-base font-bold text-slate-100">{customTimeModalState.taskTitle}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Planned Duration: {customTimeModalState.plannedDuration} minutes</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  When did you start this task today?
+                </label>
+                <input 
+                  type="time" 
+                  value={customTimeModalState.startTimeStr}
+                  onChange={e => setCustomTimeModalState(prev => ({ ...prev, startTimeStr: e.target.value }))}
+                  className="glass-input font-mono text-lg text-primary"
+                  required
+                />
+              </div>
+
+              <div className="p-3 rounded bg-slate-900/80 border border-slate-800 space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox"
+                    checked={customIsCompleted}
+                    onChange={e => setCustomIsCompleted(e.target.checked)}
+                    className="accent-primary w-4 h-4 rounded"
+                  />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                    I already completed this task
+                  </span>
+                </label>
+
+                {customIsCompleted && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800">
+                    <div>
+                      <label className="block text-xs font-mono text-slate-400 mb-1">
+                        Actual Duration (Minutes)
+                      </label>
+                      <input 
+                        type="number"
+                        min={1}
+                        value={customActualMinutes}
+                        onChange={e => setCustomActualMinutes(parseInt(e.target.value) || 0)}
+                        className="glass-input font-mono text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-mono text-slate-400 mb-1">
+                        Session Notes / Takeaways (Optional)
+                      </label>
+                      <input 
+                        type="text"
+                        placeholder="e.g. Completed during 2:00 PM break..."
+                        value={customNotes}
+                        onChange={e => setCustomNotes(e.target.value)}
+                        className="glass-input text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-slate-800">
+              <button 
+                type="button"
+                onClick={() => setCustomTimeModalState(prev => ({ ...prev, isOpen: false }))} 
+                className="px-4 py-2 rounded text-xs text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                disabled={customStartMutation.isPending}
+                onClick={() => customStartMutation.mutate({
+                  blockId: customTimeModalState.blockId,
+                  customStartTime: customTimeModalState.startTimeStr,
+                  isCompleted: customIsCompleted,
+                  actualDurationMinutes: customActualMinutes,
+                  notes: customNotes
+                })}
+                className="btn-primary text-xs flex items-center gap-1.5"
+              >
+                <CheckCircle2 size={14} />
+                {customStartMutation.isPending ? 'Saving...' : customIsCompleted ? 'Log Completed Task' : 'Start Timer at Keyed Time'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
 }
+

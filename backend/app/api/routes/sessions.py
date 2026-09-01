@@ -16,8 +16,14 @@ router = APIRouter(prefix="/sessions", tags=["Sessions"], dependencies=[Depends(
 class CreateSessionRequest(BaseModel):
     time_block_id: UUID
 
+class StartSessionRequest(BaseModel):
+    started_at: datetime | None = None
+    custom_start_time: str | None = None # e.g. "14:15"
+
 class CompleteSessionRequest(BaseModel):
     notes: str | None = None
+    actual_duration_minutes: int | None = None
+
 
 @router.post("/", response_model=WorkSessionResponse)
 def create_session(req: CreateSessionRequest, db: Session = Depends(get_db)):
@@ -41,7 +47,7 @@ def get_active_session(db: Session = Depends(get_db)):
     return ws_repo.get_active()
 
 @router.post("/{session_id}/start", response_model=WorkSessionResponse)
-def start_session(session_id: UUID, db: Session = Depends(get_db)):
+def start_session(session_id: UUID, req: StartSessionRequest | None = None, db: Session = Depends(get_db)):
     ws_repo = WorkSessionRepository(db)
     session = ws_repo.get(session_id)
     if not session:
@@ -52,9 +58,21 @@ def start_session(session_id: UUID, db: Session = Depends(get_db)):
     if active and active.id != session.id:
         raise HTTPException(status_code=400, detail="Another session is currently active")
         
+    start_dt = datetime.utcnow()
+    if req:
+        if req.started_at:
+            start_dt = req.started_at
+        elif req.custom_start_time:
+            try:
+                parts = [int(p) for p in req.custom_start_time.split(":")]
+                today = datetime.utcnow().date()
+                start_dt = datetime(today.year, today.month, today.day, parts[0], parts[1])
+            except Exception:
+                start_dt = datetime.utcnow()
+
     return ws_repo.update(session_id, WorkSessionUpdate(
         status=WorkSessionStatusEnum.started,
-        started_at=datetime.utcnow()
+        started_at=start_dt
     ))
 
 @router.post("/{session_id}/pause", response_model=WorkSessionResponse)
@@ -85,23 +103,29 @@ def resume_session(session_id: UUID, db: Session = Depends(get_db)):
     ))
 
 @router.post("/{session_id}/complete", response_model=WorkSessionResponse)
-def complete_session(session_id: UUID, req: CompleteSessionRequest, db: Session = Depends(get_db)):
+def complete_session(session_id: UUID, req: CompleteSessionRequest | None = None, db: Session = Depends(get_db)):
     ws_repo = WorkSessionRepository(db)
     session = ws_repo.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
         
     now = datetime.utcnow()
-    actual_duration = 0
-    if session.started_at:
-        total_seconds = (now - session.started_at).total_seconds()
-        active_seconds = total_seconds - session.paused_total_seconds
-        actual_duration = int(active_seconds / 60)
+    notes = req.notes if req else None
+    
+    if req and req.actual_duration_minutes is not None:
+        actual_duration = req.actual_duration_minutes
+    else:
+        actual_duration = session.planned_duration_minutes
+        if session.started_at:
+            total_seconds = (now - session.started_at).total_seconds()
+            active_seconds = total_seconds - session.paused_total_seconds
+            actual_duration = int(active_seconds / 60)
         
     return ws_repo.update(session_id, WorkSessionUpdate(
         status=WorkSessionStatusEnum.completed,
         completed_at=now,
         actual_duration_minutes=actual_duration,
-        notes=req.notes
+        notes=notes
     ))
+
 

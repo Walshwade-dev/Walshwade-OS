@@ -39,9 +39,10 @@ export default function Sidebar() {
 
       {/* Sidebar Content */}
       <aside className={clsx(
-        "bg-panel border-r border-panel-border flex flex-col transition-transform duration-300 md:relative absolute z-50 h-full w-64 md:translate-x-0",
+        "bg-panel border-r border-panel-border flex flex-col transition-transform duration-300 fixed md:relative top-0 left-0 bottom-0 z-50 h-full w-64 md:translate-x-0 shadow-2xl md:shadow-none",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
+
         <div className="p-6 hidden md:block relative before:absolute before:top-0 before:left-0 before:w-16 before:h-1 before:bg-warning overflow-hidden">
           <Link href="/" className="flex whitespace-nowrap text-3xl font-black font-[family-name:var(--font-orbitron)] text-primary tracking-[0.2em] uppercase">
             WADE OS

@@ -22,31 +22,68 @@ def generate_schedule(req: GenerateScheduleRequest, db: Session = Depends(get_db
     tb_repo = TimeBlockRepository(db)
     wp_repo = WeeklyPlanRepository(db)
     
-    # 1. Clear existing schedule for this date (simplest way to "regenerate")
-    tb_repo.delete_by_date(req.target_date)
+    # 1. Fetch existing time blocks for target date
+    existing_blocks = tb_repo.get_by_date(req.target_date)
     
-    # 2. Get current active Weekly Plan (most recent one for simplicity)
+    preserved_blocks = []
+    preserved_ids = []
+    scheduled_task_ids = set()
+    total_used_minutes = 0
+    latest_end_time = time(8, 0) # Default start time
+    
+    for tb in existing_blocks:
+        has_sessions = bool(tb.work_sessions and len(tb.work_sessions) > 0)
+        task_is_completed = bool(tb.task and tb.task.status == "completed")
+        
+        if has_sessions or task_is_completed:
+            preserved_blocks.append(tb)
+            preserved_ids.append(tb.id)
+            scheduled_task_ids.add(tb.task_id)
+            
+            # Calculate actual or planned duration
+            completed_sessions = [s for s in tb.work_sessions if s.status == "completed"]
+            if completed_sessions:
+                duration = sum(s.actual_duration_minutes or s.planned_duration_minutes for s in completed_sessions)
+            else:
+                duration = tb.planned_duration_minutes
+                
+            total_used_minutes += duration
+            if tb.end_time > latest_end_time:
+                latest_end_time = tb.end_time
+
+    # 2. Delete non-preserved (pending) time blocks
+    tb_repo.delete_pending_blocks(req.target_date, preserved_ids)
+    
+    # 3. Get current active Weekly Plan
     plans = wp_repo.get_all()
     if not plans:
         return {
             "message": "No active weekly plan found. Awaiting weekly plan creation.",
             "overcommitted": False,
             "unscheduled_task_ids": [],
-            "time_blocks_count": 0
+            "time_blocks_count": len(preserved_blocks)
         }
     active_plan = wp_repo.get(plans[0].id)
     
-    # 3. Extract planned tasks that are attached to this weekly plan
-    tasks = []
+    # 4. Extract candidate planned tasks not already scheduled/completed today
+    candidate_tasks = []
     for wpt in active_plan.tasks:
-        if wpt.task.status == "planned":
-            tasks.append(wpt.task)
+        task = wpt.task
+        if task.status == "planned" and task.id not in scheduled_task_ids:
+            candidate_tasks.append(task)
             
-    # 4. Generate schedule
-    DAILY_CAPACITY_MINUTES = 360 # Hardcoded constant per specs
-    result = generate_daily_schedule(req.target_date, DAILY_CAPACITY_MINUTES, tasks)
+    # 5. Calculate remaining capacity & generate schedule
+    DAILY_CAPACITY_MINUTES = 360 # Hardcoded capacity per specs
+    remaining_capacity = max(0, DAILY_CAPACITY_MINUTES - total_used_minutes)
     
-    # 5. Persist
+    result = generate_daily_schedule(
+        req.target_date, 
+        remaining_capacity, 
+        candidate_tasks,
+        start_time_offset=latest_end_time
+    )
+    
+    # 6. Persist new blocks
     to_create = []
     for block in result["time_blocks"]:
         to_create.append(TimeBlockCreate(
@@ -64,7 +101,7 @@ def generate_schedule(req: GenerateScheduleRequest, db: Session = Depends(get_db
         "message": "Schedule generated",
         "overcommitted": result["overcommitted"],
         "unscheduled_task_ids": result["unscheduled_task_ids"],
-        "time_blocks_count": len(to_create)
+        "time_blocks_count": len(preserved_blocks) + len(to_create)
     }
 
 @router.get("/", response_model=List[TimeBlockResponse])

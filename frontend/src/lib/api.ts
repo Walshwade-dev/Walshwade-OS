@@ -274,8 +274,10 @@ export const createSession = async (timeBlockId: string): Promise<WorkSession> =
     return response.data;
 };
 
-export const startSession = async (sessionId: string): Promise<WorkSession> => {
-    const response = await api.post(`/sessions/${sessionId}/start`);
+export const startSession = async (sessionId: string, customStartTime?: string): Promise<WorkSession> => {
+    const response = await api.post(`/sessions/${sessionId}/start`, {
+        custom_start_time: customStartTime || undefined
+    });
     return response.data;
 };
 
@@ -289,10 +291,14 @@ export const resumeSession = async (sessionId: string): Promise<WorkSession> => 
     return response.data;
 };
 
-export const completeSession = async (sessionId: string, notes?: string): Promise<WorkSession> => {
-    const response = await api.post(`/sessions/${sessionId}/complete`, { notes });
+export const completeSession = async (sessionId: string, notes?: string, actualDurationMinutes?: number): Promise<WorkSession> => {
+    const response = await api.post(`/sessions/${sessionId}/complete`, { 
+        notes, 
+        actual_duration_minutes: actualDurationMinutes || undefined 
+    });
     return response.data;
 };
+
 
 export interface DailyReview {
     id?: string;
